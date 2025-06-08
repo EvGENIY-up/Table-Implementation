@@ -1,38 +1,36 @@
-// Базовый тип для всех сущностей
-export type Entity = {
+export interface Entity {
   id: number;
-  active: boolean;
-};
+  [key: string]: any;
+}
 
-export type Product = Entity & {
+export interface Product extends Entity {
   name: string;
   options: {
     size: string;
     amount: number;
   };
+  active: boolean;
   createdAt: string;
-};
+}
 
-export type PricePlan = Entity & {
+export interface PricePlan extends Entity {
   description: string;
+  active: boolean;
   createdAt: string;
   removedAt: string;
-};
+}
 
-export type Page = Entity & {
+export interface Page extends Entity {
   title: string;
+  active: boolean;
   updatedAt: string;
   publishedAt: string;
-};
+}
 
-// Обобщенный тип для колонок таблицы
-export type ColumnConfig<T> = {
-  key: keyof T | "actions";
+export interface TableColumn<T> {
+  key: keyof T | 'actions';
   header: string;
-  render?: (item: T) => React.ReactNode;
   editable?: boolean;
-  inputType?: "text" | "textarea" | "checkbox";
-};
-
-// Тип для навигации
-export type DataType = "products" | "price-plans" | "pages";
+  inputType?: 'text' | 'textarea' | 'checkbox' | 'number';
+  render?: (item: T) => React.ReactNode;
+}

@@ -1,15 +1,15 @@
 'use client';
 
-import  DataTable from '@/components/DataTable/DataTable';
-import { Product, ColumnConfig } from '@/types/dataTypes';
+import { DataTable } from '@/components/DataTable/DataTable';
 import { productsData } from '@/data/mockData';
-import { useState }  from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorageData';
+import { Product, TableColumn } from '@/types/dataTypes';
 
+// Клиентский компонент
 export default function ProductsPage() {
-  // Используем useState для управления состоянием данных на клиенте
-  const [products, setProducts] = useState<Product[]>(productsData);
+  const [products, setProducts] = useLocalStorage<Product[]>('products', productsData);
 
-  const columns: ColumnConfig<Product>[] = [
+  const columns: TableColumn<Product>[] = [
     {
       key: 'name',
       header: 'Name',
@@ -48,19 +48,13 @@ export default function ProductsPage() {
     { key: 'actions', header: 'Actions' }
   ];
 
-  const handleUpdate = (updatedProduct: Product) => {
-    setProducts(prev => prev.map(p =>
-      p.id === updatedProduct.id ? updatedProduct : p
-    ));
-  };
-
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Products</h1>
       <DataTable
         data={products}
         columns={columns}
-        onUpdate={handleUpdate}
+        onUpdate={setProducts}
       />
     </div>
   );

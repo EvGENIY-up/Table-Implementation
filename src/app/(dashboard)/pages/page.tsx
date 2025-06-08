@@ -1,14 +1,14 @@
 'use client';
 
-import  DataTable from '@/components/DataTable/DataTable';
-import { Page, ColumnConfig } from '@/types/dataTypes';
+import { DataTable } from '@/components/DataTable/DataTable';
 import { pagesData } from '@/data/mockData';
-import { useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorageData';
+import { Page, TableColumn } from '@/types/dataTypes';
 
 export default function PagesPage() {
-  const [pages, setPages] = useState<Page[]>(pagesData);
+  const [pages, setPages] = useLocalStorage<Page[]>('pages', pagesData);
 
-  const columns: ColumnConfig<Page>[] = [
+  const columns: TableColumn<Page>[] = [
     {
       key: 'title',
       header: 'Title',
@@ -32,30 +32,24 @@ export default function PagesPage() {
     },
     {
       key: 'updatedAt',
-      header: 'Updated',
+      header: 'Last Updated',
       render: (item) => new Date(item.updatedAt).toLocaleDateString()
     },
     {
       key: 'publishedAt',
-      header: 'Published',
+      header: 'Published At',
       render: (item) => new Date(item.publishedAt).toLocaleDateString()
     },
     { key: 'actions', header: 'Actions' }
   ];
 
-  const handleUpdate = (updatedPage: Page) => {
-    setPages(prev => prev.map(p =>
-      p.id === updatedPage.id ? updatedPage : p
-    ));
-  };
-
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Pages</h1>
       <DataTable
         data={pages}
         columns={columns}
-        onUpdate={handleUpdate}
+        onUpdate={setPages}
       />
     </div>
   );

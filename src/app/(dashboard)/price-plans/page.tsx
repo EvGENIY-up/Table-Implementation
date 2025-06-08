@@ -1,14 +1,14 @@
 'use client';
 
-import DataTable from '@/components/DataTable/DataTable';
-import { PricePlan, ColumnConfig } from '@/types/dataTypes';
+import { DataTable } from '@/components/DataTable/DataTable';
 import { pricePlansData } from '@/data/mockData';
-import { useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorageData';
+import { PricePlan, TableColumn } from '@/types/dataTypes';
 
 export default function PricePlansPage() {
-  const [pricePlans, setPricePlans] = useState<PricePlan[]>(pricePlansData);
+  const [pricePlans, setPricePlans] = useLocalStorage<PricePlan[]>('pricePlans', pricePlansData);
 
-  const columns: ColumnConfig<PricePlan>[] = [
+  const columns: TableColumn<PricePlan>[] = [
     {
       key: 'description',
       header: 'Description',
@@ -43,19 +43,13 @@ export default function PricePlansPage() {
     { key: 'actions', header: 'Actions' }
   ];
 
-  const handleUpdate = (updatedPlan: PricePlan) => {
-    setPricePlans(prev => prev.map(p =>
-      p.id === updatedPlan.id ? updatedPlan : p
-    ));
-  };
-
   return (
-    <div>
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Price Plans</h1>
       <DataTable
         data={pricePlans}
         columns={columns}
-        onUpdate={handleUpdate}
+        onUpdate={setPricePlans}
       />
     </div>
   );

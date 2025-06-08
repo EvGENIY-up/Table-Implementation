@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 interface TableHeaderProps {
@@ -5,7 +7,7 @@ interface TableHeaderProps {
   setFilter: (value: string) => void;
 }
 
-export default function TableHeader({ filter, setFilter }: TableHeaderProps) {
+export function TableHeader({ filter, setFilter }: TableHeaderProps) {
   return (
     <div className="p-4 border-b border-gray-200">
       <div className="flex items-center justify-between">

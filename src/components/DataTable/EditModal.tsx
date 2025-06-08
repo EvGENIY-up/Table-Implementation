@@ -1,26 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
+import { TableColumn, Entity } from '@/types/dataTypes';
 
-interface EditModalProps {
-  item: any;
-  columns: any[];
+interface EditModalProps<T extends Entity> {
+  item: T;
+  columns: TableColumn<T>[];
   onClose: () => void;
-  onSave: (updatedItem: any) => void;
+  onSave: (updatedItem: T) => void;
 }
 
-export default function EditModal({
- item,
- columns,
- onClose,
- onSave
-}: EditModalProps) {
-  const [editedItem, setEditedItem] = useState({ ...item });
+export function EditModal<T extends Entity>({
+                                              item,
+                                              columns,
+                                              onClose,
+                                              onSave,
+                                            }: EditModalProps<T>) {
+  const [editedItem, setEditedItem] = useState<T>(item);
 
-  const handleChange = (key: string, value: string | boolean) => {
-    setEditedItem((prev: any) => ({
+  const handleChange = (key: keyof T, value: unknown) => {
+    setEditedItem(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -31,41 +32,43 @@ export default function EditModal({
           <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Item</h3>
 
           <div className="space-y-4">
-            {columns.map((column: any) => {
-              const value = editedItem[column.key];
+            {columns.map((column) => {
+              const value = editedItem[column.key as keyof T];
+              const inputType = column.inputType || 'text';
+
               return (
-                <div key={column.key}>
+                <div key={String(column.key)}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {column.header}
                   </label>
 
-                  {column.inputType === 'checkbox' ? (
+                  {inputType === 'checkbox' ? (
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         checked={Boolean(value)}
-                        onChange={e =>
-                          handleChange(column.key, e.target.checked)}
+                        onChange={(e) => handleChange(column.key as keyof T, e.target.checked)}
                         className="h-5 w-5 text-indigo-600 rounded"
                       />
                       <span className="ml-2 text-gray-700">
                         {value ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                  ) : column.inputType === 'textarea' ? (
+                  ) : inputType === 'textarea' ? (
                     <textarea
                       value={String(value)}
-                      onChange={e =>
-                        handleChange(column.key, e.target.value)}
+                      onChange={(e) => handleChange(column.key as keyof T, e.target.value)}
                       className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
                       rows={3}
                     />
                   ) : (
                     <input
-                      type={column.inputType || 'text'}
+                      type={inputType}
                       value={String(value)}
-                      onChange={e =>
-                        handleChange(column.key, e.target.value)}
+                      onChange={(e) => handleChange(
+                        column.key as keyof T,
+                        inputType === 'number' ? Number(e.target.value) : e.target.value
+                      )}
                       className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   )}
