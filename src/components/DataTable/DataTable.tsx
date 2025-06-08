@@ -12,10 +12,10 @@ interface DataTableProps<T extends Entity> {
 }
 
 export function DataTable<T extends Entity>({
-                                              data,
-                                              columns,
-                                              onUpdate,
-                                            }: DataTableProps<T>) {
+   data,
+   columns,
+   onUpdate,
+}: DataTableProps<T>) {
   const [filter, setFilter] = useState('');
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [filteredData, setFilteredData] = useState<T[]>(data);
@@ -55,6 +55,14 @@ export function DataTable<T extends Entity>({
       applyFilters(null);
     }
   }, [data, filter]);
+
+  const handleSave = async (updatedItem: T) => {
+    const updatedData = data.map(item =>
+      item.id === updatedItem.id ? updatedItem : item
+    );
+    onUpdate(updatedData);
+    setEditingItem(null); // Закрываем модальное окно
+  };
 
   return (
     <div className="overflow-x-auto bg-white rounded-lg shadow">
@@ -115,12 +123,7 @@ export function DataTable<T extends Entity>({
           item={editingItem}
           columns={columns.filter(col => col.editable)}
           onClose={() => setEditingItem(null)}
-          onSave={(updatedItem) => {
-            const updatedData = data.map(item =>
-              item.id === updatedItem.id ? updatedItem : item
-            );
-            onUpdate(updatedData);
-          }}
+          onSave={handleSave}
         />
       )}
     </div>

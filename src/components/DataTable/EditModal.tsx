@@ -11,12 +11,13 @@ interface EditModalProps<T extends Entity> {
 }
 
 export function EditModal<T extends Entity>({
-                                              item,
-                                              columns,
-                                              onClose,
-                                              onSave,
-                                            }: EditModalProps<T>) {
+ item,
+ columns,
+ onClose,
+ onSave,
+}: EditModalProps<T>) {
   const [editedItem, setEditedItem] = useState<T>(item);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (key: keyof T, value: unknown) => {
     setEditedItem(prev => ({
@@ -24,7 +25,17 @@ export function EditModal<T extends Entity>({
       [key]: value,
     }));
   };
-
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(editedItem);
+      onClose(); // Закрываем модальное окно после успешного сохранения
+    } catch (error) {
+      console.error('Error saving item:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
@@ -81,16 +92,18 @@ export function EditModal<T extends Entity>({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isSaving}
+              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="button"
-              onClick={() => onSave(editedItem)}
-              className="px-4 py-2 bg-indigo-600 text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`px-4 py-2 bg-indigo-600 text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Save Changes
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>
