@@ -1,15 +1,17 @@
-'use client';
+"use client";
 
-import { DataTable } from '@/components/DataTable/DataTable';
-import { productsData } from '@/data/mockData';
-import { useLocalStorage } from '@/hooks/useLocalStorageData';
-import { Product, TableColumn } from '@/types/dataTypes';
-import { useEffect, useState } from 'react';
+import { DataTable } from "@/components/DataTable/DataTable";
+import { productsData } from "@/data/mockData";
+import { useLocalStorage } from "@/hooks/useLocalStorageData";
+import { Product, TableColumn } from "@/types/dataTypes";
+import { useEffect, useState } from "react";
 
-// Клиентский компонент
 export default function ProductsPage() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [products, setProducts] = useLocalStorage<Product[]>('products', productsData);
+  const [products, setProducts] = useLocalStorage<Product[]>(
+    "products",
+    productsData,
+  );
 
   useEffect(() => {
     if (!isInitialized) {
@@ -19,41 +21,44 @@ export default function ProductsPage() {
 
   const columns: TableColumn<Product>[] = [
     {
-      key: 'name',
-      header: 'Name',
+      key: "name",
+      header: "Name",
       editable: true,
-      inputType: 'text'
+      inputType: "text",
     },
     {
-      key: 'options',
-      header: 'Options',
-      render: (item) => (
-        <span>
-          Size: {item.options.size}, Amount: {item.options.amount}
-        </span>
-      )
+      key: "options.size",
+      header: "Size",
+      render: (item) => <span>{item.options.size}</span>,
     },
     {
-      key: 'active',
-      header: 'Status',
+      key: "options.amount",
+      header: "Amount",
+      render: (item) => <span> {item.options.amount}</span>,
+    },
+    {
+      key: "active",
+      header: "Status",
       render: (item) => (
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-          item.active
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {item.active ? 'Active' : 'Inactive'}
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item.active
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {item.active ? "Active" : "Inactive"}
         </span>
       ),
       editable: true,
-      inputType: 'checkbox'
+      inputType: "checkbox",
     },
     {
-      key: 'createdAt',
-      header: 'Created',
-      render: (item) => new Date(item.createdAt).toLocaleDateString()
+      key: "createdAt",
+      header: "Created",
+      render: (item) => new Date(item.createdAt).toLocaleDateString(),
     },
-    { key: 'actions', header: 'Actions' }
+    { key: "actions", header: "Actions" },
   ];
 
   if (!isInitialized) {
@@ -63,11 +68,7 @@ export default function ProductsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Products</h1>
-      <DataTable
-        data={products}
-        columns={columns}
-        onUpdate={setProducts}
-      />
+      <DataTable data={products} columns={columns} onUpdate={setProducts} />
     </div>
   );
 }

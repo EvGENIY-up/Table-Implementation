@@ -28,9 +28,9 @@ export interface Page extends Entity {
 }
 
 export interface TableColumn<T> {
-  key: keyof T | 'actions';
+  key: keyof T | "actions";
   header: string;
   editable?: boolean;
-  inputType?: 'text' | 'textarea' | 'checkbox' | 'number';
+  inputType?: "text" | "textarea" | "checkbox" | "number";
   render?: (item: T) => React.ReactNode;
 }

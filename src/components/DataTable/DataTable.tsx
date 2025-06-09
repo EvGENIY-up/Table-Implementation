@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { TableColumn, Entity } from '@/types/dataTypes';
-import { EditModal } from './EditModal';
-import { TableHeader } from './TableHeader';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from "react";
+import { TableColumn, Entity } from "@/types/dataTypes";
+import { EditModal } from "./EditModal";
+import { TableHeader } from "./TableHeader";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<T extends Entity> {
   data: T[];
@@ -13,37 +13,35 @@ interface DataTableProps<T extends Entity> {
 }
 
 export function DataTable<T extends Entity>({
-   data,
-   columns,
-   onUpdate,
+  data,
+  columns,
+  onUpdate,
 }: DataTableProps<T>) {
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [filteredData, setFilteredData] = useState<T[]>(data);
   const [activeFilter, setActiveFilter] = useState<boolean | null>(null);
 
-  // Применяем все фильтры
   const applyFilters = (filterValue: string | null) => {
     let result = [...data];
 
-    // Фильтр по поиску
     if (filter) {
-      result = result.filter(item =>
+      result = result.filter((item) =>
         Object.values(item).some(
-          value => typeof value === 'string' &&
-            value.toLowerCase().includes(filter.toLowerCase())
-        )
+          (value) =>
+            typeof value === "string" &&
+            value.toLowerCase().includes(filter.toLowerCase()),
+        ),
       );
     }
 
-    // Фильтр по активности
-    if (filterValue === 'active') {
+    if (filterValue === "active") {
       setActiveFilter(true);
-      result = result.filter(item => item.active === true);
-    } else if (filterValue === 'inactive') {
+      result = result.filter((item) => item.active === true);
+    } else if (filterValue === "inactive") {
       setActiveFilter(false);
-      result = result.filter(item => item.active === false);
+      result = result.filter((item) => item.active === false);
     } else {
       setActiveFilter(null);
     }
@@ -51,7 +49,6 @@ export function DataTable<T extends Entity>({
     setFilteredData(result);
   };
 
-  // Автоматически применяем текстовый фильтр при изменении
   useEffect(() => {
     if (activeFilter === null) {
       applyFilters(null);
@@ -59,8 +56,8 @@ export function DataTable<T extends Entity>({
   }, [data, filter]);
 
   const handleSave = async (updatedItem: T) => {
-    const updatedData = data.map(item =>
-        item.id === updatedItem.id ? updatedItem : item
+    const updatedData = data.map((item) =>
+      item.id === updatedItem.id ? updatedItem : item,
     );
     onUpdate(updatedData);
     setIsEditModalOpen(false);
@@ -81,54 +78,58 @@ export function DataTable<T extends Entity>({
 
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
-        <tr>
-          {columns.map((column) => (
-            <th
-              key={String(column.key)}
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              {column.header}
-            </th>
-          ))}
-        </tr>
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={String(column.key)}
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                {column.header}
+              </th>
+            ))}
+          </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-        {filteredData.map((item) => (
-          <tr key={item.id}>
-            {columns.map((column) => {
-              if (column.key === 'actions') {
-                return (
-                  <td key="actions" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <Button
+          {filteredData.map((item) => (
+            <tr key={item.id}>
+              {columns.map((column) => {
+                if (column.key === "actions") {
+                  return (
+                    <td
+                      key="actions"
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      <Button
+                        className="cursor-pointer"
                         variant="outline"
                         onClick={() => handleEdit(item)}
-                    >
-                      Edit
-                    </Button>
+                      >
+                        Edit
+                      </Button>
+                    </td>
+                  );
+                }
+
+                return (
+                  <td
+                    key={String(column.key)}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                  >
+                    {column.render
+                      ? column.render(item)
+                      : String(item[column.key as keyof T])}
                   </td>
                 );
-              }
-
-              return (
-                <td
-                  key={String(column.key)}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                >
-                  {column.render
-                    ? column.render(item)
-                    : String(item[column.key as keyof T])}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+              })}
+            </tr>
+          ))}
         </tbody>
       </table>
 
       {editingItem && (
         <EditModal
           item={editingItem!}
-          columns={columns.filter(col => col.editable)}
+          columns={columns.filter((col) => col.editable)}
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
           onSave={handleSave}

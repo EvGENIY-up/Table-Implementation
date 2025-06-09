@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
@@ -17,20 +17,20 @@ export default function DashboardPage() {
           href="/price-plans"
           description="Manage pricing strategies"
         />
-        <Card
-          title="Pages"
-          href="/pages"
-          description="Manage content pages"
-        />
+        <Card title="Pages" href="/pages" description="Manage content pages" />
       </div>
     </div>
   );
 }
 
-function Card({ title, href, description }: {
+function Card({
+  title,
+  href,
+  description,
+}: {
   title: string;
   href: string;
-  description: string
+  description: string;
 }) {
   return (
     <Link href={href}>

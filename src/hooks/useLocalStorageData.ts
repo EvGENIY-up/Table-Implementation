@@ -1,11 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-export function useLocalStorage<T>(key: string, initialData: T[]): [T[], (data: T[]) => void] {
+export function useLocalStorage<T>(
+  key: string,
+  initialData: T[],
+): [T[], (data: T[]) => void] {
   const [data, setData] = useState<T[]>(() => {
-    // При первом рендере сразу проверяем localStorage
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedData = localStorage.getItem(key);
       return storedData ? JSON.parse(storedData) : initialData;
     }
@@ -13,15 +15,14 @@ export function useLocalStorage<T>(key: string, initialData: T[]): [T[], (data: 
   });
 
   useEffect(() => {
-    // Синхронизируем изменения между вкладками
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue) {
         setData(JSON.parse(e.newValue));
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [key]);
 
   const updateData = (newData: T[]) => {
