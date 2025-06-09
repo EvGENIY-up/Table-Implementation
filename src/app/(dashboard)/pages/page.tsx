@@ -17,7 +17,7 @@ export default function PagesPage() {
     },
     {
       key: 'active',
-      header: 'Status',
+      header: 'Status', 
       render: (item) => (
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
           item.active

@@ -1,21 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TableColumn, Entity } from '@/types/dataTypes';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface EditModalProps<T extends Entity> {
   item: T;
   columns: TableColumn<T>[];
-  onClose: () => void;
-  onSave: (updatedItem: T) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (updatedItem: T) => Promise<void> | void;
 }
 
 export function EditModal<T extends Entity>({
- item,
- columns,
- onClose,
- onSave,
-}: EditModalProps<T>) {
+                                              item,
+                                              columns,
+                                              open,
+                                              onOpenChange,
+                                              onSave,
+                                            }: EditModalProps<T>) {
   const [editedItem, setEditedItem] = useState<T>(item);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -25,89 +39,97 @@ export function EditModal<T extends Entity>({
       [key]: value,
     }));
   };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
       await onSave(editedItem);
-      onClose(); // Закрываем модальное окно после успешного сохранения
+      onOpenChange(false);
     } catch (error) {
       console.error('Error saving item:', error);
     } finally {
       setIsSaving(false);
     }
   };
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Item</h3>
 
-          <div className="space-y-4">
+  return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Item</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
             {columns.map((column) => {
               const value = editedItem[column.key as keyof T];
               const inputType = column.inputType || 'text';
 
               return (
-                <div key={String(column.key)}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {column.header}
-                  </label>
-
-                  {inputType === 'checkbox' ? (
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(value)}
-                        onChange={(e) => handleChange(column.key as keyof T, e.target.checked)}
-                        className="h-5 w-5 text-indigo-600 rounded"
-                      />
-                      <span className="ml-2 text-gray-700">
-                        {value ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
-                  ) : inputType === 'textarea' ? (
-                    <textarea
-                      value={String(value)}
-                      onChange={(e) => handleChange(column.key as keyof T, e.target.value)}
-                      className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      rows={3}
-                    />
-                  ) : (
-                    <input
-                      type={inputType}
-                      value={String(value)}
-                      onChange={(e) => handleChange(
-                        column.key as keyof T,
-                        inputType === 'number' ? Number(e.target.value) : e.target.value
-                      )}
-                      className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  )}
-                </div>
+                  <div key={String(column.key)} className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor={String(column.key)} className="text-right">
+                      {column.header}
+                    </Label>
+                    {inputType === 'checkbox' ? (
+                        <div className="col-span-3 flex items-center space-x-2">
+                          <Checkbox
+                              id={String(column.key)}
+                              checked={Boolean(value)}
+                              onCheckedChange={(checked) =>
+                                  handleChange(column.key as keyof T, checked)
+                              }
+                          />
+                          <label
+                              htmlFor={String(column.key)}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {value ? 'Active' : 'Inactive'}
+                          </label>
+                        </div>
+                    ) : inputType === 'textarea' ? (
+                        <Textarea
+                            id={String(column.key)}
+                            value={String(value)}
+                            onChange={(e) =>
+                                handleChange(column.key as keyof T, e.target.value)
+                            }
+                            className="col-span-3"
+                        />
+                    ) : (
+                        <Input
+                            id={String(column.key)}
+                            type={inputType}
+                            value={String(value)}
+                            onChange={(e) =>
+                                handleChange(
+                                    column.key as keyof T,
+                                    inputType === 'number' ? Number(e.target.value) : e.target.value
+                                )
+                            }
+                            className="col-span-3"
+                        />
+                    )}
+                  </div>
               );
             })}
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving}
-              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          <DialogFooter>
+            <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSaving}
             >
               Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`px-4 py-2 bg-indigo-600 text-sm font-medium rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            </Button>
+            <Button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              {isSaving ? 'Saving...' : 'Save changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
   );
 }

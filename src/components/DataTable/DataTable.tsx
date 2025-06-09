@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { TableColumn, Entity } from '@/types/dataTypes';
 import { EditModal } from './EditModal';
 import { TableHeader } from './TableHeader';
+import { Button } from '@/components/ui/button';
 
 interface DataTableProps<T extends Entity> {
   data: T[];
@@ -17,6 +18,7 @@ export function DataTable<T extends Entity>({
    onUpdate,
 }: DataTableProps<T>) {
   const [filter, setFilter] = useState('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [filteredData, setFilteredData] = useState<T[]>(data);
   const [activeFilter, setActiveFilter] = useState<boolean | null>(null);
@@ -58,10 +60,15 @@ export function DataTable<T extends Entity>({
 
   const handleSave = async (updatedItem: T) => {
     const updatedData = data.map(item =>
-      item.id === updatedItem.id ? updatedItem : item
+        item.id === updatedItem.id ? updatedItem : item
     );
     onUpdate(updatedData);
-    setEditingItem(null); // Закрываем модальное окно
+    setIsEditModalOpen(false);
+  };
+
+  const handleEdit = (item: T) => {
+    setEditingItem(item);
+    setIsEditModalOpen(true);
   };
 
   return (
@@ -92,12 +99,12 @@ export function DataTable<T extends Entity>({
               if (column.key === 'actions') {
                 return (
                   <td key="actions" className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button
-                      onClick={() => setEditingItem(item)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                    <Button
+                        variant="outline"
+                        onClick={() => handleEdit(item)}
                     >
                       Edit
-                    </button>
+                    </Button>
                   </td>
                 );
               }
@@ -120,9 +127,10 @@ export function DataTable<T extends Entity>({
 
       {editingItem && (
         <EditModal
-          item={editingItem}
+          item={editingItem!}
           columns={columns.filter(col => col.editable)}
-          onClose={() => setEditingItem(null)}
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
           onSave={handleSave}
         />
       )}
