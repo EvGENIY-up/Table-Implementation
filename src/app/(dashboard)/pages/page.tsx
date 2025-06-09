@@ -4,9 +4,17 @@ import { DataTable } from '@/components/DataTable/DataTable';
 import { pagesData } from '@/data/mockData';
 import { useLocalStorage } from '@/hooks/useLocalStorageData';
 import { Page, TableColumn } from '@/types/dataTypes';
+import { useEffect, useState } from 'react';
 
 export default function PagesPage() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [pages, setPages] = useLocalStorage<Page[]>('pages', pagesData);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   const columns: TableColumn<Page>[] = [
     {
@@ -42,6 +50,10 @@ export default function PagesPage() {
     },
     { key: 'actions', header: 'Actions' }
   ];
+
+  if (!isInitialized) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

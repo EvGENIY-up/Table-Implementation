@@ -2,30 +2,32 @@
 
 import { useState, useEffect } from 'react';
 
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
+export function useLocalStorage<T>(key: string, initialData: T[]): [T[], (data: T[]) => void] {
+  const [data, setData] = useState<T[]>(() => {
+    // При первом рендере сразу проверяем localStorage
+    if (typeof window !== 'undefined') {
+      const storedData = localStorage.getItem(key);
+      return storedData ? JSON.parse(storedData) : initialData;
+    }
+    return initialData;
+  });
 
   useEffect(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      if (item) {
-        setStoredValue(JSON.parse(item));
-      } else {
-        window.localStorage.setItem(key, JSON.stringify(initialValue));
+    // Синхронизируем изменения между вкладками
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key && e.newValue) {
+        setData(JSON.parse(e.newValue));
       }
-    } catch (error) {
-      console.error('Error accessing localStorage:', error);
-    }
-  }, [key, initialValue]);
+    };
 
-  const setValue = (value: T) => {
-    try {
-      setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error setting localStorage:', error);
-    }
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [key]);
+
+  const updateData = (newData: T[]) => {
+    setData(newData);
+    localStorage.setItem(key, JSON.stringify(newData));
   };
 
-  return [storedValue, setValue];
+  return [data, updateData];
 }

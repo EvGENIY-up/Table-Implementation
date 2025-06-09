@@ -4,9 +4,17 @@ import { DataTable } from '@/components/DataTable/DataTable';
 import { pricePlansData } from '@/data/mockData';
 import { useLocalStorage } from '@/hooks/useLocalStorageData';
 import { PricePlan, TableColumn } from '@/types/dataTypes';
+import { useEffect, useState } from 'react';
 
 export default function PricePlansPage() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [pricePlans, setPricePlans] = useLocalStorage<PricePlan[]>('pricePlans', pricePlansData);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   const columns: TableColumn<PricePlan>[] = [
     {
@@ -42,6 +50,10 @@ export default function PricePlansPage() {
     },
     { key: 'actions', header: 'Actions' }
   ];
+
+  if (!isInitialized) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

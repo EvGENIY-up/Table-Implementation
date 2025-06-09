@@ -4,10 +4,18 @@ import { DataTable } from '@/components/DataTable/DataTable';
 import { productsData } from '@/data/mockData';
 import { useLocalStorage } from '@/hooks/useLocalStorageData';
 import { Product, TableColumn } from '@/types/dataTypes';
+import { useEffect, useState } from 'react';
 
 // Клиентский компонент
 export default function ProductsPage() {
+  const [isInitialized, setIsInitialized] = useState(false);
   const [products, setProducts] = useLocalStorage<Product[]>('products', productsData);
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   const columns: TableColumn<Product>[] = [
     {
@@ -47,6 +55,10 @@ export default function ProductsPage() {
     },
     { key: 'actions', header: 'Actions' }
   ];
+
+  if (!isInitialized) {
+    return <div className="container mx-auto px-4 py-8">Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
